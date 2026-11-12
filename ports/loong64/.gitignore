@@ -1,0 +1,27 @@
+# 本地工具链与下载缓存（约 600 MB，由 00-fetch-runtime.sh / 05 重新生成）
+downloads/
+opt/
+
+# 缓存、临时文件与本地生成的二进制
+*.tgz
+*.node
+*.tmp
+*.swp
+*.bak
+node_modules/
+dist/
+.env
+.env.*
+.DS_Store
+Thumbs.db
+
+# 本地构建日志与启动截图体积大且不可复现，不入库；
+# 结构化结果 report/*.json 与文档 report/*.md 保留作为证据链。
+/*.log
+report/*.log
+report/*.png
+
+# 安装包超过 GitHub 单文件 100 MB 限制，走 GitHub Release 附件分发
+*.deb
+*.pkg.tar.zst
+*.AppImage

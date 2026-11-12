@@ -4,10 +4,10 @@ import type { PluginSandboxHandle, PluginSandboxRegisterInput } from "@zcode/sha
 import {
   BrowserWindow,
   clipboard,
-  ClipboardItem,
   MessageChannelMain,
   app,
   dialog,
+  nativeImage,
   session as electronSession,
   webContents as electronWebContents,
   ipcMain,
@@ -25,6 +25,31 @@ import { createPluginSandboxRegistry } from "./registry.js";
 import { preparePluginSandboxSession } from "./session.js";
 import { sandboxCaptureSchema, scaleCaptureRect } from "./capture.js";
 import { DesktopBrowserScreenshotActivityController } from "@desktop/main/browserView/browserScreenshotActivityController.js";
+
+/**
+ * Electron 44 移除了同步的 `clipboard.writeImage`，图片复制改为异步
+ * `clipboard.write([new ClipboardItem({ ... })])`。
+ *
+ * loong64 目前只有 Electron 43 的龙芯移植构建，并不导出 `ClipboardItem`；而 ESM 的具名导入
+ * 会在模块链接期校验导出表，缺失即抛 SyntaxError 并终止整个主进程。因此这里不做静态导入，
+ * 改为调用时探测：存在 ClipboardItem 就走 44 的异步写入，否则回落到 43 的同步 writeImage。
+ * 两条路径都直接调用原生剪贴板，写入失败仍会向 IPC 调用方传播。
+ */
+async function writePngToClipboard(png: Uint8Array): Promise<void> {
+  const { ClipboardItem } = (await import("electron")) as unknown as {
+    ClipboardItem?: new (items: Record<string, Blob>) => unknown;
+  };
+  if (ClipboardItem) {
+    const write = clipboard.write as unknown as (items: unknown[]) => Promise<void>;
+    await write([
+      new ClipboardItem({
+        "image/png": new Blob([Uint8Array.from(png)], { type: "image/png" }),
+      }),
+    ]);
+    return;
+  }
+  clipboard.writeImage(nativeImage.createFromBuffer(Buffer.from(png)));
+}
 
 export interface PluginSandboxHost {
   clearBrowserData(): Promise<void>;
@@ -341,12 +366,8 @@ export function installPluginSandboxHost(input: {
     // 截图期间页面可能释放或换代；旧请求不得把错误页面的图像写入剪贴板。
     if (!isCurrent()) throw new Error("Sandbox capture is no longer available");
     const cropped = captured.crop(scaleCaptureRect(request, captured.getSize()));
-    // Electron 44 移除同步 writeImage；以 PNG 保留图像编码，等待原生写入后才确认复制成功。
-    await clipboard.write([
-      new ClipboardItem({
-        "image/png": new Blob([Uint8Array.from(cropped.toPNG())], { type: "image/png" }),
-      }),
-    ]);
+    // 以 PNG 保留图像编码，等待原生写入后才确认复制成功（44 走异步 write，43 回落 writeImage）。
+    await writePngToClipboard(cropped.toPNG());
   });
   ipcMain.handle(
     PlatformChannels.PluginSandboxDispose,

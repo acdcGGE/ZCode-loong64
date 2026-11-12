@@ -3,6 +3,7 @@ const SUPPORTED_DESKTOP_PLATFORM_KEYS = [
   "darwin-arm64",
   "darwin-x64",
   "linux-arm64",
+  "linux-loong64",
   "linux-x64",
   "win32-arm64",
   "win32-x64",
@@ -37,6 +38,9 @@ const SHARP_VARIANTS_BY_PLATFORM = {
   "darwin-arm64": ["sharp-darwin-arm64", "sharp-libvips-darwin-arm64"],
   "linux-x64": ["sharp-linux-x64", "sharp-libvips-linux-x64"],
   "linux-arm64": ["sharp-linux-arm64", "sharp-libvips-linux-arm64"],
+  // loong64: 上游无 sharp 预编译包，全部变体排除（fail-closed）；
+  // 等 @img-loong64/sharp-linux-loong64 落地后在此登记对应变体名。
+  "linux-loong64": [],
 };
 
 function assertSupportedTargetPlatformKey(targetPlatformKey) {

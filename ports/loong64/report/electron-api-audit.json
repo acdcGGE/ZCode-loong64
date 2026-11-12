@@ -1,0 +1,31 @@
+{
+  "generatedAt": "2026-11-12T03:19:44.406Z",
+  "electronTypings": "43.7.7",
+  "scannedFiles": 8281,
+  "distinctElectronImports": 57,
+  "importSites": 344,
+  "missing": [],
+  "typeOnlyImports": [
+    "AboutPanelOptionsOptions",
+    "BrowserWindowConstructorOptions",
+    "ContextMenuParams",
+    "Display",
+    "Event",
+    "Input",
+    "IpcMain",
+    "IpcMainEvent",
+    "IpcMainInvokeEvent",
+    "IpcRenderer",
+    "MenuItemConstructorOptions",
+    "MessageBoxOptions",
+    "MessageBoxReturnValue",
+    "OnBeforeRequestListenerDetails",
+    "Point",
+    "ProcessMetric",
+    "ProxyConfig",
+    "Rectangle",
+    "Streams",
+    "WebPreferences",
+    "WindowOpenHandlerResponse"
+  ]
+}

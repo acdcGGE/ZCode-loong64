@@ -14,6 +14,7 @@ supportedArchitectures:
     - current
     - x64
     - arm64
+    - loong64
   libc:
     - current
     - glibc
@@ -30,3 +31,10 @@ allowBuilds:
   protobufjs: true
   ssh2: true
   unsafe-pointer: true
+  # loong64: 上游没有预编译产物，允许从源码构建
+  "@napi-rs/canvas": true
+  "@napi-rs/keyring": true
+  "@tailwindcss/oxide": true
+  "@mbears/opentui-core": true
+  lightningcss: true
+  sharp: true

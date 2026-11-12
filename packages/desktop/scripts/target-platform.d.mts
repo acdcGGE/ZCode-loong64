@@ -1,5 +1,5 @@
 export type TargetPlatformOs = "darwin" | "win32" | "linux";
-export type TargetPlatformArch = "x64" | "arm64";
+export type TargetPlatformArch = "x64" | "arm64" | "loong64";
 
 export interface TargetPlatform {
   os: TargetPlatformOs;

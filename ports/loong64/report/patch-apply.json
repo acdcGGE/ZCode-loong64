@@ -1,0 +1,180 @@
+{
+  "zcodeRoot": "<zcode-root>",
+  "appliedAt": "2026-11-11T15:07:11.098Z",
+  "results": [
+    {
+      "id": "workspace-cpu-loong64",
+      "file": "pnpm-workspace.yaml",
+      "status": "ALREADY_APPLIED",
+      "note": "让 pnpm 解析/安装 linux-loong64 的 optional native 包"
+    },
+    {
+      "id": "workspace-allowbuilds-loong64",
+      "file": "pnpm-workspace.yaml",
+      "status": "ALREADY_APPLIED",
+      "note": "pnpm 10 默认禁止 install 脚本，放开需要从源码编译的原生包"
+    },
+    {
+      "id": "target-platform-arch",
+      "file": "packages/desktop/scripts/target-platform.mjs",
+      "status": "ALREADY_APPLIED",
+      "note": "getTargetPlatform() 接受 loong64，产出 linux-loong64 平台键"
+    },
+    {
+      "id": "target-platform-types",
+      "file": "packages/desktop/scripts/target-platform.d.mts",
+      "status": "ALREADY_APPLIED",
+      "note": "同步类型定义，避免 typecheck 失败"
+    },
+    {
+      "id": "bundle-default-os",
+      "file": "packages/desktop/scripts/bundle.mjs",
+      "status": "ALREADY_APPLIED",
+      "note": "龙芯移植默认目标平台改为 linux"
+    },
+    {
+      "id": "bundle-default-arch",
+      "file": "packages/desktop/scripts/bundle.mjs",
+      "status": "ALREADY_APPLIED",
+      "note": "龙芯移植默认目标架构改为 loong64"
+    },
+    {
+      "id": "bundle-arch-alias",
+      "file": "packages/desktop/scripts/bundle.mjs",
+      "status": "ALREADY_APPLIED",
+      "note": "--arch loong64 / loongarch64 均可解析"
+    },
+    {
+      "id": "bundle-arch-flag",
+      "file": "packages/desktop/scripts/bundle.mjs",
+      "status": "ALREADY_APPLIED",
+      "note": "@loongdotjs/electron-builder 的龙芯 CLI 标志"
+    },
+    {
+      "id": "bundle-artifact-hints",
+      "file": "packages/desktop/scripts/bundle.mjs",
+      "status": "ALREADY_APPLIED",
+      "note": "产物名校验兼容 loong64 命名"
+    },
+    {
+      "id": "bundle-electron-mirror",
+      "file": "packages/desktop/scripts/bundle.mjs",
+      "status": "ALREADY_APPLIED",
+      "note": "Electron 运行时改从 electron-loong64 release 获取"
+    },
+    {
+      "id": "desktop-electron-version",
+      "file": "packages/desktop/package.json",
+      "status": "ALREADY_APPLIED",
+      "note": "electron-loong64 目前最高预编译版本为 v43.7.7"
+    },
+    {
+      "id": "root-builder-overrides",
+      "file": "package.json",
+      "status": "ALREADY_APPLIED",
+      "note": "官方 electron-builder 26.17.0 不认识 loong64，替换成龙芯分支三件套"
+    },
+    {
+      "id": "mise-electron-mirror",
+      "file": "mise.toml",
+      "status": "ALREADY_APPLIED",
+      "note": "mise 任务环境的 Electron 镜像"
+    },
+    {
+      "id": "npm-registry-mirror",
+      "file": ".npmrc",
+      "status": "ALREADY_APPLIED",
+      "note": "本机实测 npmjs 单请求 10s / npmmirror 0.8s，切国内源加速依赖安装"
+    },
+    {
+      "id": "native-search-arch-loong64",
+      "file": "scripts/native-search-tools-config.mjs",
+      "status": "ALREADY_APPLIED",
+      "note": "让 linux-loong64 被识别；它不在 ENABLED_NATIVE_SEARCH_PLATFORM_KEYS 中，会走 enabled=false 的安全降级（跳过原生 ripgrep/ugrep 资源准备），而不是直接抛错"
+    },
+    {
+      "id": "keyring-platform-arch",
+      "file": "scripts/stage-credential-keyring.mjs",
+      "status": "ALREADY_APPLIED",
+      "note": "keyringPlatformPackage() 接受 linux-loong64；desktop-native-package-policy 也调用它生成裁剪名单，原正则会抛 Unsupported keyring platform"
+    },
+    {
+      "id": "desktop-policy-platform-key",
+      "file": "packages/desktop/scripts/desktop-native-package-policy.mjs",
+      "status": "ALREADY_APPLIED",
+      "note": "assertSupportedTargetPlatformKey() 接受 linux-loong64；否则 electron-builder 的 createDesktopNativePackagePrunePatterns 直接抛不支持的桌面目标平台"
+    },
+    {
+      "id": "desktop-policy-sharp-variants",
+      "file": "packages/desktop/scripts/desktop-native-package-policy.mjs",
+      "status": "ALREADY_APPLIED",
+      "note": "SHARP_VARIANTS_BY_PLATFORM 缺 key 会让 .includes() 抛 TypeError；给空数组表示所有 sharp 变体都不是目标平台资源"
+    },
+    {
+      "id": "builder-config-schema-26-15",
+      "file": "packages/desktop/electron-builder.config.js",
+      "status": "ALREADY_APPLIED",
+      "note": "消除 electron-builder 版本差导致的 Invalid configuration object（全量静态比对确认仅此一个未知字段）"
+    },
+    {
+      "id": "electron-dist-env-override",
+      "file": "packages/desktop/electron-builder.config.js",
+      "status": "ALREADY_APPLIED",
+      "note": "让 00-fetch-runtime.sh 下载并校验过的本地 Electron zip 直接进入打包，绕开慢速/易挂起的在线下载"
+    },
+    {
+      "id": "linux-dir-target-loong64",
+      "file": "packages/desktop/electron-builder.config.js",
+      "status": "ALREADY_APPLIED",
+      "note": "避免 electron-builder 在 packaging 尾声尝试下载 x86_64 AppImage/fpm 工具链导致挂起"
+    },
+    {
+      "id": "keyring-stage-loong64-degrade",
+      "file": "scripts/stage-credential-keyring.mjs",
+      "status": "ALREADY_APPLIED",
+      "note": "消除 prepare 阶段 Cannot find module '@napi-rs/keyring-linux-loong64-gnu'；运行时降级路径上游已实现（systemCredentialCipher.ts:162 catch）"
+    },
+    {
+      "id": "asar-audit-loong64-dir",
+      "file": "packages/desktop/scripts/bundle.mjs",
+      "status": "ALREADY_APPLIED",
+      "note": "打包本体已成功，后置运行时依赖审计却因目录名不含 arch 找不到 app.asar 而误报失败"
+    },
+    {
+      "id": "size-audit-skip-dir-target",
+      "file": "packages/desktop/scripts/bundle.mjs",
+      "status": "ALREADY_APPLIED",
+      "note": "--dir 输出没有 .AppImage/.deb 等单文件产物，findBuiltArtifact 必然抛错"
+    },
+    {
+      "id": "plugin-sandbox-clipboard-import",
+      "file": "packages/desktop/src/main/pluginSandbox/host.ts",
+      "status": "ALREADY_APPLIED",
+      "note": "Electron 43 不导出 ClipboardItem，静态具名导入在模块链接期抛 SyntaxError 直接终止主进程（本次崩溃根因）"
+    },
+    {
+      "id": "plugin-sandbox-clipboard-native-image",
+      "file": "packages/desktop/src/main/pluginSandbox/host.ts",
+      "status": "ALREADY_APPLIED",
+      "note": "为 Electron 43 回落路径引入 nativeImage（43/44 均导出，不影响 44 行为）"
+    },
+    {
+      "id": "plugin-sandbox-clipboard-writer",
+      "file": "packages/desktop/src/main/pluginSandbox/host.ts",
+      "status": "ALREADY_APPLIED",
+      "note": "43/44 双路径剪贴板写入：有 ClipboardItem 走异步 write，否则回落 writeImage，保持上游 44 语义不变"
+    },
+    {
+      "id": "plugin-sandbox-clipboard-call-site",
+      "file": "packages/desktop/src/main/pluginSandbox/host.ts",
+      "status": "ALREADY_APPLIED",
+      "note": "把 IPC 处理器的剪贴板写入切到兼容层；截图失效校验与错误传播保持不变"
+    },
+    {
+      "id": "loong64-gpu-crash-limit",
+      "file": "packages/desktop/src/main/index.ts",
+      "status": "ALREADY_APPLIED",
+      "note": "退出时 GPU 进程重启必败 → gpu_data_manager FATAL abort（SIGILL/退出码 132）；放开崩溃上限后退出码恢复 0"
+    }
+  ]
+}

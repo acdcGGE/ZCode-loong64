@@ -29,6 +29,9 @@ function normalizeTargetArch(rawArch) {
     case "arm64":
     case "aarch64":
       return "arm64";
+    case "loong64":
+    case "loongarch64":
+      return "loong64";
     default:
       throw new Error(`Unsupported target arch: ${rawArch}`);
   }

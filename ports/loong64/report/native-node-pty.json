@@ -1,0 +1,14 @@
+{
+  "platform": "linux-loong64",
+  "electronVersion": "43.7.7",
+  "source": "loongnix-official@1.2.0-beta.10",
+  "officialRegistry": "https://registry.loongnix.cn:5873",
+  "officialVersion": "1.2.0-beta.10",
+  "stagedPrebuild": "<zcode-root>/node_modules/node-pty/prebuilds/linux-loong64/pty.node",
+  "stagedPackage": "<zcode-root>/node_modules/@lydell/node-pty-linux-loong64",
+  "electronLoadTest": "fork,open,resize,process",
+  "node24LoadTest": "pass",
+  "beforePackResolve": "<zcode-root>/node_modules/@lydell/node-pty-linux-loong64/prebuilds/linux-loong64/pty.node",
+  "elf": "ELF 64-bit LSB shared object, LoongArch, version 1 (SYSV), dynamically linked, BuildID[sha1]=0d71dd2f00c95b2721a14c36f61500ebba497c35, not stripped",
+  "verified": true
+}

@@ -40,8 +40,8 @@ const runtimeModuleLookupRoots = [
   resolve(workspaceRoot, "node_modules", ".pnpm", "node_modules"),
 ];
 const pnpmCommand = "pnpm";
-const DEFAULT_TARGET_OS = "mac";
-const DEFAULT_TARGET_ARCH = "arm64";
+const DEFAULT_TARGET_OS = "linux";
+const DEFAULT_TARGET_ARCH = "loong64";
 const desktopDistDir = process.env.ZCODE_DESKTOP_DIST_DIR || "dist";
 const desktopDistRoot = resolve(desktopRoot, desktopDistDir);
 const desktopProductIdentity = resolveDesktopProductIdentity(process.env);
@@ -63,6 +63,8 @@ const archAliasMap = new Map([
   ["x86_64", "x64"],
   ["arm64", "arm64"],
   ["aarch64", "arm64"],
+  ["loong64", "loong64"],
+  ["loongarch64", "loong64"],
 ]);
 
 const osBuilderFlagMap = {
@@ -74,6 +76,7 @@ const osBuilderFlagMap = {
 const archBuilderFlagMap = {
   x64: "--x64",
   arm64: "--arm64",
+  loong64: "--loong64",
 };
 
 const artifactExtensionsByOs = {
@@ -84,6 +87,7 @@ const artifactExtensionsByOs = {
 const artifactArchHintsByArch = {
   x64: ["x64", "x86_64", "amd64"],
   arm64: ["arm64", "aarch64"],
+  loong64: ["loong64", "loongarch64"],
 };
 const commandStdoutMaxBuffer = 64 * 1024 * 1024;
 const requiredRuntimeModules = [
@@ -127,7 +131,7 @@ const requiredRuntimeModules = [
 const electronBuilderRetryCount = 3;
 const electronBuilderRetryDelayMs = 5_000;
 const electronBuilderHeartbeatIntervalMs = 30_000;
-export const DEFAULT_ELECTRON_MIRROR = "https://npmmirror.com/mirrors/electron/";
+export const DEFAULT_ELECTRON_MIRROR = "https://github.com/darkyzhou/electron-loong64/releases/download/";
 export const NPMMIRROR_ELECTRON_BUILDER_BINARIES_MIRROR =
   "https://registry.npmmirror.com/-/binary/electron-builder-binaries/";
 export const OFFICIAL_ELECTRON_BUILDER_BINARIES_MIRROR =
@@ -669,7 +673,12 @@ function resolveAppAsarPath(os, arch) {
     return resolve(
       desktopRoot,
       desktopDistDir,
-      arch === "arm64" ? "linux-arm64-unpacked" : "linux-unpacked",
+      // loong64 输出目录是 linux-loong64-unpacked（electron-builder 按 arch 命名）。
+      arch === "loong64"
+        ? "linux-loong64-unpacked"
+        : arch === "arm64"
+          ? "linux-arm64-unpacked"
+          : "linux-unpacked",
       "resources",
       "app.asar",
     );
@@ -785,6 +794,11 @@ async function main() {
     verifyPackagedRuntimeDependencies(os, arch),
   );
 
+  // loong64 产物形态是 --dir（unpacked 目录），没有可审计的单文件安装包。
+  if (arch === "loong64") {
+    console.log("[bundle] loong64 为 --dir 产物形态，跳过安装包体积审计");
+    return;
+  }
   const artifactPath = findBuiltArtifact(os, arch);
   runTimedSync("bundle:audit-bundle-size", () =>
     run(process.execPath, [

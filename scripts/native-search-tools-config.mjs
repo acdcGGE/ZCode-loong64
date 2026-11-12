@@ -242,6 +242,9 @@ export function normalizeNativeSearchArch(rawArch = process.arch) {
     case "arm64":
     case "aarch64":
       return "arm64";
+    case "loong64":
+    case "loongarch64":
+      return "loong64";
     default:
       throw new Error(`unsupported native search architecture ${rawArch}`);
   }

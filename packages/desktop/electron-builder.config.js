@@ -626,6 +626,10 @@ export default {
   ...(targetPlatform.os === "win32"
     ? { electronFuses: { enableNodeCliInspectArguments: false } }
     : {}),
+  // loong64: electron-builder 的 @electron/get 走官方 CDN 拉 electron zip（本机实测会
+  // 静默挂起数分钟）。ZCODE_ELECTRON_DIST 指向本地 zip 时走 electronDist 快路径，
+  // 直接解压、完全跳过下载（ElectronFramework.js selectElectron 分支）。
+  ...(process.env.ZCODE_ELECTRON_DIST ? { electronDist: process.env.ZCODE_ELECTRON_DIST } : {}),
   electronDownload: {
     // ELECTRON_MIRROR 是 @electron/get 的全局环境变量，会覆盖 dmg-builder 等
     // generic artifact 自己传入的 mirrorOptions，导致 builder 辅助包被错误拼到 Electron runtime 镜像目录。
@@ -887,7 +891,10 @@ export default {
   ],
   // pnpm 依赖图不完整时禁止仅记录警告并继续生成安装包；afterPack 只能补齐可解析依赖，
   // collector 已确认缺失的生产依赖必须在打包阶段停止。
-  allowMissingDependencies: false,
+  // loong64: @loongdotjs/electron-builder 是 26.15.6，其 app-builder-lib scheme.json
+  // 没有上游 26.17.0 新增的 allowMissingDependencies 字段，带上去会直接 schema 校验失败。
+  // 26.15.6 默认行为就是"缺依赖即失败"，去掉该显式声明语义不变；
+  // 待龙芯分支跟进 26.17+ 后恢复此行。
   // postinstall 会先优先复用 node-pty 自带的 Windows 预编译产物，其他平台再按需 electron-rebuild。
   // 打包阶段统一复用安装时准备好的原生文件，避免 electron-builder 再触发一轮不受控的本地编译。
   npmRebuild: false,
@@ -961,7 +968,11 @@ export default {
       : {}),
   },
   linux: {
-    target: ["AppImage", "deb", "rpm", "pacman"],
+    // loong64: AppImage/deb/rpm/pacman 的打包工具链（appimage 需 x86_64 运行时、
+    // fpm 需从 GitHub 下载二进制）在龙芯上既下不动也跑不了；--dir 产出的 unpacked
+    // 目录是 electron-builder 在龙芯上的交付形态，deb / pacman 安装包已由移植层的
+    // scripts/10-package-linux.mjs 用本机 dpkg-deb + bsdtar/zstd 从该目录另行构造。
+    target: targetPlatform.key === "linux-loong64" ? ["dir"] : ["AppImage", "deb", "rpm", "pacman"],
     artifactName: buildDesktopArtifactName("linux"),
     // desktop 包名是 scoped package（@zcode/desktop），electron-builder 默认会把
     // Linux executable/Icon 推成 @zcodedesktop。部分桌面环境无法按这个 icon name 命中
