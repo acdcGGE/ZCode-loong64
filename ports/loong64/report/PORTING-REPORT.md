@@ -247,5 +247,5 @@ Electron 二进制不带，真实报 `undefined symbol: _ZTVN10__cxxabiv117__cla
 - `<源码树>/packages/desktop/dist/zcode-preview-3.18.0-1-loong64.pkg.tar.zst` — **ArchLinux 安装包**（约 212 MiB）
 
 > 两个安装包因超过 GitHub 单文件 100 MB 限制，不进 git，作为
-> `acdcGGE/ZCode` 的 Release `loong64-3.18.0-preview` 附件分发；
+> [`acdcGGE/ZCode` 的 Release `loong64-3.18.0-preview`](https://github.com/acdcGGE/ZCode/releases/tag/loong64-3.18.0-preview) 附件分发；
 > `report/linux-packages.json` 记录了各自体积与 SHA256，可校验下载结果。

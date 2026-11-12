@@ -214,8 +214,8 @@ cd ZCode/ports/loong64
 - `.gitignore` 排除 `downloads/`、`opt/`（约 600 MB 本地工具链）、`build/`、
   `report/*.log` 与截图；入库的是脚本、补丁、文档与关键 JSON，增量约 280 KB。
 - **安装包不进 git**：`.deb` 与 `.pkg.tar.zst` 各约 212 MiB，超过 GitHub 单文件
-  100 MB 限制，作为本仓库 Release `loong64-3.18.0-preview` 的附件分发
-  （见仓库 Releases 页）。本地构建后可用
+  100 MB 限制，作为 [Release `loong64-3.18.0-preview`](https://github.com/acdcGGE/ZCode/releases/tag/loong64-3.18.0-preview)
+  的附件分发（含 `SHA256SUMS`）。本地构建后可用
   `node scripts/10-package-linux.mjs --check` 复验体积与 SHA256。
 - **许可沿用仓库根的 Apache-2.0 LICENSE**，无需单独文件；第三方二进制来源与许可
   见 `THIRD-PARTY-NOTICES.md`。Release 附件的 control / `.PKGINFO` 已标注
