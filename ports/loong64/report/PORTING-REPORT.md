@@ -1,4 +1,4 @@
-# ZCode → linux-loong64 移植实测报告（精简版）
+# ZCode → linux-loong64 移植实测报告
 
 **日期**：2026-11-11（补充：2026-11-12）
 **机器**：Deepin 25 / Loongson-3A5000 LA464 / glibc 2.38 / 15 GiB RAM
