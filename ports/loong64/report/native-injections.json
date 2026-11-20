@@ -1,6 +1,6 @@
 {
-  "zcodeRoot": "<zcode-root>",
-  "injectedAt": "2026-11-12T01:12:02.353Z",
+  "zcodeRoot": "/home/yuri/Documents/ZCode-loong64",
+  "injectedAt": "2026-11-20T10:23:15.228Z",
   "results": [
     {
       "id": "rolldown-js",

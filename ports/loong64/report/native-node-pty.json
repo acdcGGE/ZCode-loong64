@@ -1,14 +1,14 @@
 {
   "platform": "linux-loong64",
   "electronVersion": "43.7.7",
-  "source": "loongnix-official@1.2.0-beta.10",
+  "source": "local-build",
   "officialRegistry": "https://registry.loongnix.cn:5873",
   "officialVersion": "1.2.0-beta.10",
-  "stagedPrebuild": "<zcode-root>/node_modules/node-pty/prebuilds/linux-loong64/pty.node",
-  "stagedPackage": "<zcode-root>/node_modules/@lydell/node-pty-linux-loong64",
+  "stagedPrebuild": "/home/yuri/Documents/ZCode-loong64/node_modules/node-pty/prebuilds/linux-loong64/pty.node",
+  "stagedPackage": "/home/yuri/Documents/ZCode-loong64/node_modules/@lydell/node-pty-linux-loong64",
   "electronLoadTest": "fork,open,resize,process",
   "node24LoadTest": "pass",
-  "beforePackResolve": "<zcode-root>/node_modules/@lydell/node-pty-linux-loong64/prebuilds/linux-loong64/pty.node",
-  "elf": "ELF 64-bit LSB shared object, LoongArch, version 1 (SYSV), dynamically linked, BuildID[sha1]=0d71dd2f00c95b2721a14c36f61500ebba497c35, not stripped",
+  "beforePackResolve": "/home/yuri/Documents/ZCode-loong64/node_modules/@lydell/node-pty-linux-loong64/prebuilds/linux-loong64/pty.node",
+  "elf": "ELF 64-bit LSB shared object, LoongArch, version 1 (SYSV), dynamically linked, BuildID[sha1]=d59a63507ca37888409d6dca674c3baf78d084d1, not stripped",
   "verified": true
 }

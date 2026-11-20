@@ -1,6 +1,6 @@
 {
-  "zcodeRoot": "<zcode-root>",
-  "appliedAt": "2026-11-11T15:07:11.098Z",
+  "zcodeRoot": "/home/yuri/Documents/ZCode-loong64",
+  "appliedAt": "2026-11-20T10:20:17.892Z",
   "results": [
     {
       "id": "workspace-cpu-loong64",
@@ -115,6 +115,12 @@
       "file": "packages/desktop/electron-builder.config.js",
       "status": "ALREADY_APPLIED",
       "note": "消除 electron-builder 版本差导致的 Invalid configuration object（全量静态比对确认仅此一个未知字段）"
+    },
+    {
+      "id": "postinstall-electron-local-dist",
+      "file": "packages/desktop/scripts/ensure-electron-runtime.mjs",
+      "status": "APPLIED",
+      "note": "postinstall 的 ensureElectronRuntime 优先用本地已校验 Electron dist，避免弱网下载 139MB 导致 exit 1"
     },
     {
       "id": "electron-dist-env-override",

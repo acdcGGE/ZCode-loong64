@@ -53,19 +53,22 @@ PREBUILD="$PREBUILD_DIR/pty.node"
 SHIM_DIR="$ZCODE_ROOT/node_modules/@lydell/node-pty-$PLATFORM_KEY"
 SOURCE="none"
 
+# 验证失败一律 return 1（不能 die/exit）：官方包可能因 GLIBC 版本不匹配而无法加载，
+# 此时必须让 fetch_official 失败，好让主流程降级到本地源码编译。
 verify_pty() {
   local bin="$1"
-  file "$bin" | grep -qi 'LoongArch' || die "产物不是 LoongArch ELF: $bin"
-  readelf -d "$bin" | grep -q 'libnode.so' && die "存在 libnode DT_NEEDED（Electron 下会 SIGSEGV）: $bin"
+  file "$bin" | grep -qi 'LoongArch' || { log "验证失败: 产物不是 LoongArch ELF: $bin"; return 1; }
+  readelf -d "$bin" | grep -q 'libnode.so' && { log "验证失败: 存在 libnode DT_NEEDED（Electron 下会 SIGSEGV）: $bin"; return 1; }
   local out
   out="$(ELECTRON_RUN_AS_NODE=1 "$ELECTRON_BIN" -e \
     "const p=require('$bin'); console.log(Object.keys(p).join(','))" 2>&1)" \
-    || die "Electron $ELECTRON_VER 加载 pty.node 失败: ${out:0:300}"
-  echo "$out" | grep -q 'fork' || die "Electron 加载结果异常: $out"
+    || { log "验证失败: Electron $ELECTRON_VER 加载 pty.node 失败: ${out:0:400}"; return 1; }
+  echo "$out" | grep -q 'fork' || { log "验证失败: Electron 加载结果异常: $out"; return 1; }
   log "Electron $ELECTRON_VER 加载通过: $out"
   node -e "const p=require('$bin'); if(!p.fork) process.exit(1)" \
-    || die "Node 24 加载 pty.node 失败"
+    || { log "验证失败: Node 24 加载 pty.node 失败"; return 1; }
   log "Node 24 加载通过"
+  return 0
 }
 
 # ---- A. 官方包路径 ----
@@ -82,7 +85,7 @@ fetch_official() {
   tar -xzf "$OFFICIAL_TGZ" -C "$tmp" || { rm -rf "$tmp"; return 1; }
   local bin="$tmp/package/prebuilds/$PLATFORM_KEY/pty.node"
   [[ -f "$bin" ]] || { rm -rf "$tmp"; log "官方包内无 prebuilds/$PLATFORM_KEY/pty.node"; return 1; }
-  verify_pty "$bin"
+  verify_pty "$bin" || { rm -rf "$tmp"; log "官方包验证失败（常见于上游重编后要求更高 GLIBC），降级本地编译"; return 1; }
   mkdir -p "$PREBUILD_DIR"
   cp -f "$bin" "$PREBUILD"
   # 完整落地官方包（lib/ + package.json + prebuilds），保持与真实安装一致的布局，
@@ -124,7 +127,7 @@ build_from_source() {
     done
   fi
   readelf -d "$built" | grep -q 'libnode.so' && die "仍存在 libnode DT_NEEDED"
-  verify_pty "$built"
+  verify_pty "$built" || die "本地编译产物验证失败"
 
   mkdir -p "$PREBUILD_DIR" "$SHIM_DIR/prebuilds/$PLATFORM_KEY"
   cp -f "$built" "$PREBUILD"

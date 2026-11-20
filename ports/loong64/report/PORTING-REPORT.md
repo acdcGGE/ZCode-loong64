@@ -1,8 +1,8 @@
 # ZCode → linux-loong64 移植实测报告
 
-**日期**：2026-11-11（补充：2026-11-12）
+**日期**：2026-11-11（补充：2026-11-12、2026-11-20）
 **机器**：Deepin 25 / Loongson-3A5000 LA464 / glibc 2.38 / 15 GiB RAM
-**上游**：acdcGGE/ZCode v3.18.0（18657 文件，shallow clone 356 MB）
+**上游**：acdcGGE/ZCode（分支基于 `loong64-3.18.0-preview` tag；11-20 合入上游后源码版本为 3.18.2）
 
 ## 一、结论
 
@@ -100,6 +100,13 @@
 - **canvas 漏声明依赖**：官方 `.node` 的 `DT_NEEDED` 无 `libstdc++`，但 Skia 用到 C++ RTTI；host Node 自带该库故 `node -e` **假阳性通过**，Electron 下报 `undefined symbol: _ZTVN10__cxxabiv117__class_type_infoE`。用 `patchelf --add-needed libstdc++.so.6`（幂等，`--print-needed` 判重）补齐，并在 `04-verify.sh` 增加 Electron 43 下的**功能**验证（真实绘制 PNG + 原生 Scanner 加载）。
 - **canvas 不进 `app.asar` 是上游有意设计**：`findDesktopNativePackageViolations` 对 `/node_modules/@napi-rs/canvas*` 是 fail-closed 断言，pdf 插件自带轻量 `Matrix2D` 顶替 pdf.js 的 DOMMatrix。canvas 只落在源码树 / 服务 CLI / 开发 / 构建期。
 
+### 重新安装复现（2026-11-20）
+
+- **`pnpm install` 的 `packages/desktop postinstall` exit 1**：链路是 `node-pty-rebuild.mjs → ensureElectronRuntime()`，后者只认 `node_modules/electron/path.txt` + dist，没有就跑 `electron/install.js` 从 GitHub 下载 139 MB zip，弱网下 `TypeError: terminated`。`02-install.sh` 虽设了 `ELECTRON_OVERRIDE_DIST_PATH`，但 install.js 不认该变量（它只被 electron-builder 用）。修复：补丁器新增第 30 条 `postinstall-electron-local-dist`，给 `ensure-electron-runtime.mjs` 的 `installRuntime()` 加本地 dist 快路径——override 目录存在就把已校验的 Electron 43.7.7 dist 硬链进包并写 `path.txt`，零下载。重跑 `02-install.sh` exit 0。
+- **`cpu-features` 编译失败非致命**：它是 ssh2 的 `optionalDependencies`，loong64 上 buildcheck 只编了 `hwcaps.c` 但 `binding.cc` 无条件 `using namespace cpu_features` → gyp 失败；pnpm 忽略可选依赖失败，不影响 install 退出码。
+- **龙芯官方 node-pty 包被上游重编，GLIBC 要求升到 2.42**：同一版本号 `1.2.0-beta.10` 的 tgz，11-11 实测可加载（BuildID `0d71dd…`），11-20 重新下载的变成要求 `GLIBC_2.42`（BuildID `7e5c6a…`），本机 glibc 2.38 加载失败。同时发现 `06-build-loong64-node-pty.sh` 的 `verify_pty()` 用 `die`（exit 1），会绕过主流程已有的 `fetch_official || build_from_source` 降级。修复：把 verify_pty 的失败改为 `return 1` 并在调用点检查，官方包不兼容时自动降级本地编译（Electron headers + patchelf 去 libnode），`--force` 无需人工干预。
+- **pnpm install 会剪除手工注入的 loong64 绑定**：每次 `02-install.sh` 后必须重跑 `05-inject-native-bindings.mjs`（6 项）和 `06-build-loong64-node-pty.sh`（node-pty），否则 `04-verify.sh` 报注入项缺失。完整顺序见 `reproduce.sh`。
+
 ### 安装包三坑
 
 1. `dpkg -S` 反查 `DT_NEEDED` 误命中 `gcc-14.4.0` / `noctalia` / `liblol` → 用「系统库目录白名单 + 基线运行库 + `-dev`/Essential 过滤」收敛到 26 项干净依赖。
@@ -165,7 +172,7 @@
 ## 八、产物清单
 
 - `scripts/00-fetch-runtime.sh` — 运行时下载/校验/安装（多镜像 + aria2 多连接）
-- `scripts/01-apply-port.mjs` — 29 条幂等源码补丁
+- `scripts/01-apply-port.mjs` — 30 条幂等源码补丁
 - `scripts/02-install.sh`、`03-build.sh`、`04-verify.sh` — 安装 / 分阶段构建 / 体检
 - `scripts/05-inject-native-bindings.mjs` — 6 项已验证注入（含 2 项龙芯官方原生包）+ 3 项 EXPERIMENTAL
 - `scripts/06-build-loong64-node-pty.sh` — node-pty 官方包获取（fallback 本地编译 + patchelf）与加载验证
@@ -174,13 +181,13 @@
 - `scripts/10-package-linux.mjs` — `deb` / `pacman` 安装包构造（本机 `dpkg-deb` + `bsdtar`/`zstd`）、22 项自检、`--check` 幂等复验
 - `reproduce.sh` — 11 阶段一键复现（含 `package` 阶段与出包后的二次体检）
 - `patches/zcode-loong64.patch` — 上游改动完整 diff（14 文件 / 364 行，可 `git apply -R` 回退）
-- `report/porting-matrix.json` — 结构化矩阵（工具链 / 29 补丁 / 原生覆盖 / 安装包 / 龙芯官方源清单）
+- `report/porting-matrix.json` — 结构化矩阵（工具链 / 30 补丁 / 原生覆盖 / 安装包 / 龙芯官方源清单）
 - `report/linux-packages.json` — 两个安装包的身份、安装布局、Depends 反查、SHA256 与 22 项自检结果
 - `report/zcode-loong64-launch.png`、`report/zcode-loong64-installed-deb.png` — 两张真实启动截图
 - `report/*.json` — 补丁、注入、运行时、体检、node-pty、安装包的结构化结果（入库）
 - `report/*.log`、`report/*.png` — 每次构建/打包/冒烟的原始日志与截图；**仅本地留档，不入库**
 - `packages/desktop/dist/linux-loong64-unpacked/` — 最终桌面应用产物（约 805 MB，`--dir` 形态）
-- `packages/desktop/dist/zcode-preview_3.18.0_loong64.deb` — Debian/Deepin 安装包（约 212 MiB）
-- `packages/desktop/dist/zcode-preview-3.18.0-1-loong64.pkg.tar.zst` — ArchLinux 安装包（约 212 MiB）
+- `packages/desktop/dist/zcode-preview_3.18.2_loong64.deb` — Debian/Deepin 安装包（约 212 MiB，sha256 `fa0cc559…c8413b6`）
+- `packages/desktop/dist/zcode-preview-3.18.2-1-loong64.pkg.tar.zst` — ArchLinux 安装包（约 212 MiB，sha256 `3af4124d…27c05`）
 
-> 两个安装包因超过 GitHub 单文件 100 MB 限制，不进 git，作为 `acdcGGE/ZCode` 的 Release `loong64-3.18.0-preview` 附件分发；`report/linux-packages.json` 记录了体积与 SHA256，可校验下载结果。
+> 两个安装包因超过 GitHub 单文件 100 MB 限制，不进 git；`report/linux-packages.json` 记录了体积与 SHA256，可校验下载结果。11-20 重构建时源码已合入上游更新至 3.18.2，产物名随之从 3.18.0 更新。
