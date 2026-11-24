@@ -9,11 +9,9 @@
 
 ## v4.0.0 构建记录（2026-11-24）
 
-- 源码基线：仓库 `main` @ `a4b4445`，版本 **4.0.0**；移植层来自 `feat/loong64-port` @ `4efef90`。
-- 30 条补丁在 v4.0.0 上全部适用；依赖版本与移植层锁定的龙芯原生包一致，无需改脚本版本常量。
-- 体检 18/18、安装包检查 22/22、真实启动冒烟 5/5 通过；依赖来源审查见 `report/DEPENDENCY-AUDIT.json`。
-- 产物：`zcode-preview_4.0.0_loong64.deb`、`zcode-preview-4.0.0-1-loong64.pkg.tar.zst` 走 Release 分发（单文件约 213 MiB，超仓库 100 MB 限制）。
-- node-pty 官方 prebuild 在 Electron 43 加载失败，构建时按脚本设计降级为从 pnpm 网络安装的源码本地编译，已验证 Electron/Node 双运行时可加载。
+- 基线：main `a4b4445` / v4.0.0；移植层 `feat/loong64-port` @ `4efef90`。30 条补丁零冲突。
+- 验证：体检 18/18、包检查 22/22、启动冒烟 5/5；依赖来源见 `report/DEPENDENCY-AUDIT.json`。
+- 产物：两个约 213 MiB 安装包走 Release；node-pty 按脚本设计降级为源码编译并验证通过。
 
 ## 实测环境
 
