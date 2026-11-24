@@ -1,0 +1,87 @@
+{
+  "topic": "ZCode loong64 移植脚本依赖来源审查",
+  "reviewedAt": "2026-11-24T16:50+08:00",
+  "portBranch": {
+    "repo": "https://github.com/acdcGGE/ZCode-loong64",
+    "ref": "feat/loong64-port",
+    "commit": "4efef9010b3f5d5b984154b9e3e52454fbaa39a5"
+  },
+  "buildTarget": {
+    "repo": "https://github.com/acdcGGE/ZCode-loong64",
+    "ref": "main",
+    "commit": "a4b4445141eb7d3b3e99eada9292775383bfc44e",
+    "version": "4.0.0"
+  },
+  "policy": "产品依赖必须来自仓库自身或网络；不得使用本机预置的源码、库或二进制。",
+  "findings": [
+    {
+      "id": "source",
+      "status": "PASS",
+      "detail": "源码从 GitHub 克隆；移植层从 codeload 源码包获取。ports/loong64/ 内未发现任何 .node/.tgz/.zip/.tar.xz 预置二进制。"
+    },
+    {
+      "id": "runtime",
+      "status": "PASS",
+      "detail": "00-fetch-runtime.sh 从 GitHub release 下载 Node 24.14.0、Electron 43.7.7、ffmpeg 与 headers；Node/Electron/ffmpeg 使用官方 SHASUMS256.txt 校验，headers 用 tar 完整性校验。"
+    },
+    {
+      "id": "package-manager",
+      "status": "PASS",
+      "detail": "02-install.sh 使用下载得到的 pnpm 10.33.2，registry 固定为 https://registry.npmmirror.com；未使用系统 Node/pnpm。"
+    },
+    {
+      "id": "native-bindings",
+      "status": "PASS",
+      "detail": "05-inject-native-bindings.mjs 从 npmmirror 与 registry.loongnix.cn:5873 下载 tarball，落地 rolldown/lightningcss/oxide/canvas 的 loong64 绑定；版本与 v4.0.0 lockfile 一致。"
+    },
+    {
+      "id": "node-pty",
+      "status": "PASS",
+      "detail": "06-build-loong64-node-pty.sh 优先从龙芯官方源下载官方 prebuild；失败时从 pnpm 已安装的 node-pty 源码本地编译（源码仍来自网络），并验证 Electron/Node 双运行时加载。"
+    },
+    {
+      "id": "electron-dist",
+      "status": "PASS",
+      "detail": "Electron 使用 00 脚本下载并校验的 zip/目录，通过 ZCODE_ELECTRON_DIST 与 ELECTRON_OVERRIDE_DIST_PATH 传入；不读取本机预装 Electron。"
+    },
+    {
+      "id": "host-tools",
+      "status": "NOT_PRODUCT_DEPENDENCY",
+      "detail": "curl/aria2c/tar/unzip/sha256sum/patchelf/readelf/gcc/g++/make/python3/node-gyp/dpkg-deb/bsdtar/zstd 等被视为构建主机工具，不是 ZCode 产品依赖；脚本不会从本机拷贝应用二进制或库。"
+    },
+    {
+      "id": "stale-reports",
+      "status": "FIXED",
+      "detail": "移植层 report/*.json 原含作者本机 /home/yuri/Documents/ZCode-loong64 路径。构建前已删除，全部由本次构建重新生成。"
+    }
+  ],
+  "changesMade": [
+    "00-fetch-runtime.sh：补充 ffmpeg-v43.7.7-linux-loong64.zip 的 SHASUMS256 校验，避免缓存损坏时静默通过。",
+    "README.md：补丁条数由 29 修正为脚本实际的 30 条。",
+    "删除 ports/loong64/report 中上一台机器留下的旧报告，避免 04-verify.sh 误读旧包文件名。"
+  ],
+  "patchCheck": {
+    "command": "node scripts/01-apply-port.mjs --check --zcode=<v4.0.0 tree>",
+    "total": 30,
+    "failed": 0
+  },
+  "buildResult": {
+    "status": "PASS",
+    "verify": "18 PASS / 0 FAIL",
+    "packageChecks": "22 PASS / 0 FAIL",
+    "smoke": "5 PASS / 0 FAIL（主进程未崩溃、主窗口创建、渲染无失败、host 子进程拉起、观察窗口内存活）",
+    "artifacts": {
+      "deb": {
+        "path": "packages/desktop/dist/zcode-preview_4.0.0_loong64.deb",
+        "bytes": 222608298,
+        "sha256": "3b793fa9020818f69459d50ca2fb9a2f7e7fdb8e70620b070bed2bf7147e2c86"
+      },
+      "pacman": {
+        "path": "packages/desktop/dist/zcode-preview-4.0.0-1-loong64.pkg.tar.zst",
+        "bytes": 222668433,
+        "sha256": "b22fcd9e00fb475dbbe24cd6a36d10a3d4661b81ae3af440dc0e3977ddf956c2"
+      },
+      "unpacked": "packages/desktop/dist/linux-loong64-unpacked/"
+    }
+  }
+}

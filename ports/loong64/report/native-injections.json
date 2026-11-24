@@ -1,0 +1,99 @@
+{
+  "zcodeRoot": "/home/yuri/WorkBuddy/2026-11-24-15-50-52/ZCode-loong64",
+  "injectedAt": "2026-11-24T08:50:54.268Z",
+  "results": [
+    {
+      "id": "rolldown-js",
+      "status": "VERIFIED",
+      "community": "rolldown@1.0.3",
+      "targets": [
+        {
+          "path": "node_modules/rolldown",
+          "landed": true
+        }
+      ],
+      "loadTest": "DEFERRED",
+      "state": "INJECTED"
+    },
+    {
+      "id": "rolldown",
+      "status": "VERIFIED",
+      "community": "@rolldown-loong64/binding-linux-loong64-gnu@1.0.3",
+      "targets": [
+        {
+          "path": "node_modules/rolldown/dist/shared/rolldown-binding.linux-loong64-gnu.node",
+          "landed": true,
+          "bytes": 21810320
+        }
+      ],
+      "sourceFile": "rolldown-binding.linux-loong64-gnu.node",
+      "sizeBytes": 21810320,
+      "loadTest": "PASS",
+      "state": "INJECTED"
+    },
+    {
+      "id": "lightningcss",
+      "status": "VERIFIED",
+      "community": "@loong64/lightningcss-linux-loong64-gnu@1.33.0",
+      "targets": [
+        {
+          "path": "node_modules/lightningcss/lightningcss.linux-loong64-gnu.node",
+          "landed": true,
+          "bytes": 9163432
+        }
+      ],
+      "sourceFile": "lightningcss.linux-loong64-gnu.node",
+      "sizeBytes": 9163432,
+      "loadTest": "PASS",
+      "state": "INJECTED"
+    },
+    {
+      "id": "tailwindcss-oxide-native",
+      "status": "VERIFIED",
+      "community": "@tailwindcss/oxide-linux-loong64-gnu@4.2.2",
+      "targets": [
+        {
+          "path": "node_modules/@tailwindcss/oxide/tailwindcss-oxide.linux-loong64-gnu.node",
+          "landed": true,
+          "bytes": 3422160
+        }
+      ],
+      "sourceFile": "tailwindcss-oxide.linux-loong64-gnu.node",
+      "sizeBytes": 3422160,
+      "loadTest": "PASS",
+      "state": "INJECTED"
+    },
+    {
+      "id": "napi-rs-canvas-native",
+      "status": "VERIFIED",
+      "community": "@napi-rs/canvas-linux-loong64-gnu@0.1.100",
+      "targets": [
+        {
+          "path": "node_modules/@napi-rs/canvas/skia.linux-loong64-gnu.node",
+          "landed": true,
+          "bytes": 30812521
+        }
+      ],
+      "sourceFile": "skia.linux-loong64-gnu.node",
+      "sizeBytes": 30753736,
+      "patchElf": [
+        "libstdc++.so.6"
+      ],
+      "loadTest": "PASS",
+      "state": "INJECTED"
+    },
+    {
+      "id": "tailwindcss-oxide-wasi",
+      "status": "VERIFIED",
+      "community": "@tailwindcss/oxide-wasm32-wasi@4.2.2",
+      "targets": [
+        {
+          "path": "node_modules/@tailwindcss/oxide-wasm32-wasi",
+          "landed": true
+        }
+      ],
+      "loadTest": "PASS",
+      "state": "INJECTED"
+    }
+  ]
+}

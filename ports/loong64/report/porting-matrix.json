@@ -1,0 +1,465 @@
+{
+  "project": "ZCode v3.18.0 -> linux-loong64",
+  "upstream": "https://github.com/acdcGGE/ZCode",
+  "generatedAt": "2026-11-12T02:32:38Z",
+  "host": {
+    "os": "Deepin 25 (crimson)",
+    "kernel": "6.18.48-loong64-desktop-rolling",
+    "arch": "loongarch64 / loong64",
+    "cpu": "Loongson-3A5000 LA464, lsx + lasx",
+    "glibc": "2.38",
+    "ramGiB": 15,
+    "diskFreeGiB": 56,
+    "note": "electron-loong64 二进制要求 glibc>=2.38 且支持 LSX；本机实测 LSX 指令可执行"
+  },
+  "toolchain": [
+    {
+      "component": "node",
+      "upstreamPin": "24.14.0 (mise.toml)",
+      "officialLoong64": false,
+      "source": "loong64/node GitHub release v24.14.0 (node-v24.14.0-linux-loong64.tar.xz)",
+      "sha256": "5c54e9131cbc53135fa0b93d0f4f5c6473f1ad8004b9c3325101fe60322731e4",
+      "status": "VERIFIED",
+      "evidence": "node -v => v24.14.0 loong64 modules=137"
+    },
+    {
+      "component": "pnpm",
+      "upstreamPin": "10.33.2",
+      "source": "npm (pure JS, 架构无关)",
+      "status": "VERIFIED",
+      "evidence": "pnpm -v => 10.33.2"
+    },
+    {
+      "component": "electron",
+      "upstreamPin": "44.7.0",
+      "loong64Max": "43.7.7",
+      "source": "darkyzhou/electron-loong64 release v43.7.7",
+      "sha256": "cdd64fb1365ba965c36055622f4eecad6e30fb81f5a3b2a81eca4995a8ef8875",
+      "decision": "降级到 43.7.7；官方 44.7.0 无 loong64 构建，自编译需 32 GiB RAM / 200 GiB 磁盘",
+      "status": "VERIFIED",
+      "evidence": "ELECTRON_RUN_AS_NODE=1 electron -p => electron 43.7.7, node 24.21.0, arch loong64, ABI 148"
+    },
+    {
+      "component": "electron-builder",
+      "upstreamPin": "26.17.0",
+      "source": "@loongdotjs/electron-builder 26.15.6",
+      "decision": "pnpm overrides 替换 electron-builder / app-builder-lib / builder-util 三个包",
+      "status": "VERIFIED",
+      "evidence": "完整跑通 linux/loong64 packaging 与 afterPack 全部断言；26.15.6 与 26.17.0 的 schema 差异已适配"
+    }
+  ],
+  "patches": [
+    {
+      "id": "workspace-cpu-loong64",
+      "file": "pnpm-workspace.yaml",
+      "purpose": "supportedArchitectures.cpu 增加 loong64",
+      "seq": 1
+    },
+    {
+      "id": "workspace-allowbuilds-loong64",
+      "file": "pnpm-workspace.yaml",
+      "purpose": "放开需源码编译的原生包 install 脚本",
+      "seq": 2
+    },
+    {
+      "id": "target-platform-arch",
+      "file": "packages/desktop/scripts/target-platform.mjs",
+      "purpose": "识别 loong64，产出 linux-loong64 平台键",
+      "seq": 3
+    },
+    {
+      "id": "target-platform-types",
+      "file": "packages/desktop/scripts/target-platform.d.mts",
+      "purpose": "类型定义同步",
+      "seq": 4
+    },
+    {
+      "id": "bundle-default-os",
+      "file": "packages/desktop/scripts/bundle.mjs",
+      "purpose": "默认目标 OS 改 linux",
+      "seq": 5
+    },
+    {
+      "id": "bundle-default-arch",
+      "file": "packages/desktop/scripts/bundle.mjs",
+      "purpose": "默认目标 arch 改 loong64",
+      "seq": 6
+    },
+    {
+      "id": "bundle-arch-alias",
+      "file": "packages/desktop/scripts/bundle.mjs",
+      "purpose": "--arch loong64/loongarch64 可解析",
+      "seq": 7
+    },
+    {
+      "id": "bundle-arch-flag",
+      "file": "packages/desktop/scripts/bundle.mjs",
+      "purpose": "传给 electron-builder 的 --loong64",
+      "seq": 8
+    },
+    {
+      "id": "bundle-artifact-hints",
+      "file": "packages/desktop/scripts/bundle.mjs",
+      "purpose": "产物名校验兼容 loong64",
+      "seq": 9
+    },
+    {
+      "id": "bundle-electron-mirror",
+      "file": "packages/desktop/scripts/bundle.mjs",
+      "purpose": "Electron 镜像指向 electron-loong64 release",
+      "seq": 10
+    },
+    {
+      "id": "desktop-electron-version",
+      "file": "packages/desktop/package.json",
+      "purpose": "electron 44.7.0 -> 43.7.7",
+      "seq": 11
+    },
+    {
+      "id": "root-builder-overrides",
+      "file": "package.json",
+      "purpose": "electron-builder 三件套替换为龙芯分支",
+      "seq": 12
+    },
+    {
+      "id": "mise-electron-mirror",
+      "file": "mise.toml",
+      "purpose": "mise 环境的 Electron 镜像",
+      "seq": 13
+    },
+    {
+      "id": "npm-registry-mirror",
+      "file": ".npmrc",
+      "purpose": "切 npmmirror（实测 0.8s vs npmjs 10s）",
+      "seq": 14
+    },
+    {
+      "id": "native-search-arch-loong64",
+      "file": "scripts/native-search-tools-config.mjs",
+      "purpose": "识别 loong64；因不在发布白名单内，走 enabled=false 的安全降级，跳过原生 ripgrep/ugrep 资源准备",
+      "seq": 15
+    },
+    {
+      "id": "keyring-platform-arch",
+      "file": "scripts/stage-credential-keyring.mjs",
+      "purpose": "keyringPlatformPackage 正则接受 loong64；desktop-native-package-policy 也调用它生成裁剪名单，原正则会抛 Unsupported keyring platform",
+      "seq": 16
+    },
+    {
+      "id": "desktop-policy-platform-key",
+      "file": "packages/desktop/scripts/desktop-native-package-policy.mjs",
+      "purpose": "assertSupportedTargetPlatformKey 接受 linux-loong64；否则 createDesktopNativePackagePrunePatterns 直接抛错",
+      "seq": 17
+    },
+    {
+      "id": "desktop-policy-sharp-variants",
+      "file": "packages/desktop/scripts/desktop-native-package-policy.mjs",
+      "purpose": "SHARP_VARIANTS_BY_PLATFORM 补 linux-loong64: []；缺 key 会让 .includes() 抛 TypeError，空数组表示所有 sharp 变体都不是目标资源",
+      "seq": 18
+    },
+    {
+      "id": "builder-config-schema-26-15",
+      "file": "packages/desktop/electron-builder.config.js",
+      "purpose": "删除上游 26.17.0 新增、龙芯 26.15.6 schema 不认识的 allowMissingDependencies；26.15.6 默认即缺依赖失败，语义不变",
+      "seq": 19
+    },
+    {
+      "id": "electron-dist-env-override",
+      "file": "packages/desktop/electron-builder.config.js",
+      "purpose": "ZCODE_ELECTRON_DIST 环境变量注入 electronDist，指向本地 zip 时直接解压、跳过 @electron/get 在线下载（实测在线通道会静默挂起数分钟）",
+      "seq": 20
+    },
+    {
+      "id": "linux-dir-target-loong64",
+      "file": "packages/desktop/electron-builder.config.js",
+      "purpose": "loong64 的 linux.target 改为 [\"dir\"]：AppImage/fpm 工具链是 x86_64 二进制且需在线下载，龙芯不可用；交付 unpacked 目录，deb/pacman 由移植层 scripts/10-package-linux.mjs 从该目录另行构造",
+      "seq": 21
+    },
+    {
+      "id": "keyring-stage-loong64-degrade",
+      "file": "scripts/stage-credential-keyring.mjs",
+      "purpose": "loong64 缺 @napi-rs/keyring-linux-loong64-gnu 时跳过原生包 stage（运行时 systemCredentialCipher 已有 catch + 文件凭据回退）；其余平台维持缺包即失败",
+      "seq": 22
+    },
+    {
+      "id": "asar-audit-loong64-dir",
+      "file": "packages/desktop/scripts/bundle.mjs",
+      "purpose": "resolveAppAsarPath 的 linux 分支识别 loong64 输出目录 linux-loong64-unpacked",
+      "seq": 23
+    },
+    {
+      "id": "size-audit-skip-dir-target",
+      "file": "packages/desktop/scripts/bundle.mjs",
+      "purpose": "loong64 为 --dir 产物形态（无单文件安装包），跳过安装包体积审计",
+      "seq": 24
+    },
+    {
+      "id": "plugin-sandbox-clipboard-import",
+      "file": "packages/desktop/src/main/pluginSandbox/host.ts",
+      "purpose": "去掉 ClipboardItem 的静态具名导入：Electron 43 不导出该符号，ESM 链接期即抛 SyntaxError 终止主进程",
+      "seq": 25
+    },
+    {
+      "id": "plugin-sandbox-clipboard-native-image",
+      "file": "packages/desktop/src/main/pluginSandbox/host.ts",
+      "purpose": "引入 nativeImage 供 43 回落路径使用（43/44 均导出，不影响 44 行为）",
+      "seq": 26
+    },
+    {
+      "id": "plugin-sandbox-clipboard-writer",
+      "file": "packages/desktop/src/main/pluginSandbox/host.ts",
+      "purpose": "writePngToClipboard 兼容层：有 ClipboardItem 走 44 异步 write，否则回落 43 同步 writeImage",
+      "seq": 27
+    },
+    {
+      "id": "plugin-sandbox-clipboard-call-site",
+      "file": "packages/desktop/src/main/pluginSandbox/host.ts",
+      "purpose": "IPC 剪贴板写入切到兼容层，保留截图失效校验与错误传播语义",
+      "seq": 28
+    },
+    {
+      "id": "loong64-gpu-crash-limit",
+      "file": "packages/desktop/src/main/index.ts",
+      "purpose": "loong64 专用：退出时 GPU 进程重启必败导致 gpu_data_manager FATAL abort（SIGILL / 退出码 132），放开崩溃上限后退出码恢复 0",
+      "seq": 29
+    }
+  ],
+  "nativeBindingsInjected": [
+    {
+      "id": "rolldown-js",
+      "type": "js-overlay",
+      "upstream": "rolldown 1.0.0-rc.15 (vite 8.0.8 精确依赖)",
+      "community": "rolldown@1.0.3 (官方 JS 层)",
+      "target": "node_modules/rolldown/dist + package.json",
+      "status": "VERIFIED",
+      "evidence": "rc.15 JS + 1.0.3 binding 在 6308 模块构建触发 ThreadsafeFunction<BindingLog> 返回值错误；JS 对齐后 @zcode/web-share 构建通过"
+    },
+    {
+      "id": "rolldown",
+      "upstream": "rolldown 1.0.3",
+      "community": "@rolldown-loong64/binding-linux-loong64-gnu@1.0.3",
+      "target": "node_modules/rolldown/dist/shared/rolldown-binding.linux-loong64-gnu.node",
+      "status": "VERIFIED",
+      "evidence": "vite build 通过；1.2.8 因 onLog 回调约定不兼容会失败"
+    },
+    {
+      "id": "lightningcss",
+      "upstream": "lightningcss 1.32.0",
+      "community": "@loong64/lightningcss-linux-loong64-gnu@1.33.0",
+      "target": "node_modules/lightningcss/lightningcss.linux-loong64-gnu.node",
+      "status": "VERIFIED",
+      "evidence": "transform() 输出 CSS 正常；@zcode/formal-proof 构建成功"
+    },
+    {
+      "id": "tailwindcss-oxide-wasi",
+      "type": "package",
+      "upstream": "@tailwindcss/oxide 4.2.2",
+      "community": "@tailwindcss/oxide-wasm32-wasi@4.2.2",
+      "target": "node_modules/@tailwindcss/oxide-wasm32-wasi",
+      "status": "FALLBACK_VERIFIED",
+      "evidence": "原生 .node 存在时上游 index.js 不会走到 WASM；保留为兜底，非主路径"
+    },
+    {
+      "id": "tailwindcss-oxide-native",
+      "upstream": "@tailwindcss/oxide@4.2.2",
+      "community": "@tailwindcss/oxide-linux-loong64-gnu@4.2.2（龙芯官方源）",
+      "target": "node_modules/@tailwindcss/oxide/tailwindcss-oxide.linux-loong64-gnu.node",
+      "status": "VERIFIED",
+      "evidence": "index.js:366 loong64-gnu 分支优先 require 同目录 .node；Node 24 / Electron 43 双运行时加载成功，取代 WASM 成为主路径"
+    },
+    {
+      "id": "napi-rs-canvas-native",
+      "upstream": "@napi-rs/canvas@0.1.100",
+      "community": "@napi-rs/canvas-linux-loong64-gnu@0.1.100（龙芯官方源）",
+      "target": "node_modules/@napi-rs/canvas/skia.linux-loong64-gnu.node",
+      "status": "VERIFIED",
+      "evidence": "官方包漏声明 libstdc++，05 脚本 patchelf --add-needed 补齐；Electron 43 下真实绘制 PNG 成功。桌面产物按上游设计裁剪，此包服务源码树/CLI/构建期"
+    }
+  ],
+  "nativeModuleCoverage": [
+    {
+      "package": "@esbuild/linux-loong64",
+      "upstream": true,
+      "status": "VERIFIED",
+      "evidence": "esbuild 0.25.12 transformSync 成功"
+    },
+    {
+      "package": "@rollup/rollup-linux-loong64-gnu",
+      "upstream": true,
+      "status": "INSTALLED"
+    },
+    {
+      "package": "rolldown",
+      "upstream": false,
+      "community": "@rolldown-loong64/binding-linux-loong64-gnu",
+      "status": "INJECTED"
+    },
+    {
+      "package": "lightningcss",
+      "upstream": false,
+      "community": "@loong64/lightningcss-linux-loong64-gnu",
+      "status": "INJECTED"
+    },
+    {
+      "package": "@oxc-parser/binding-*",
+      "upstream": false,
+      "community": "@loongdotjs/oxc-parser-binding-linux-loong64-gnu@0.142.1",
+      "status": "AVAILABLE_UNTESTED"
+    },
+    {
+      "package": "@oxc-resolver/binding-*",
+      "upstream": false,
+      "community": "@unrs/resolver-binding-linux-loong64-gnu@1.13.0",
+      "status": "AVAILABLE_UNTESTED"
+    },
+    {
+      "package": "@oxfmt/binding-*",
+      "upstream": false,
+      "community": "@oxfmt-loong64/binding-linux-loong64-gnu@0.54.0",
+      "status": "AVAILABLE_UNTESTED"
+    },
+    {
+      "package": "@oxlint/binding-*",
+      "upstream": false,
+      "community": "@oxlint-loong64/binding-linux-loong64-gnu@1.69.0",
+      "status": "AVAILABLE_UNTESTED"
+    },
+    {
+      "package": "sharp / @img/*",
+      "upstream": false,
+      "community": "龙芯官方源 registry.loongnix.cn:5873 有 @img/sharp-linux-loong64@0.35.5 + @img/sharp-libvips-linux-loong64@1.3.4；社区另有 @img-loong64/sharp-linux-loong64@0.35.4",
+      "status": "AVAILABLE_UNTESTED"
+    },
+    {
+      "package": "koffi",
+      "upstream": "partially",
+      "community": "koffi 2.15.6 npm 包自带 linux_loong64 二进制；社区另有 @koromix/koffi-linux-loong64@3.3.7",
+      "status": "VERIFIED",
+      "evidence": "afterPack 的 koffi stage 校验通过（打包实测）"
+    },
+    {
+      "package": "@tailwindcss/oxide-*",
+      "upstream": true,
+      "community": "龙芯官方源 @tailwindcss/oxide-linux-loong64-gnu@4.2.2（与 lock 4.2.2 精确对齐）；WASM 包仅保留为兜底",
+      "status": "OFFICIAL_NATIVE_VERIFIED",
+      "evidence": "index.js:366 的 loong64-gnu 分支优先 require 同目录 .node；Node 24 与 Electron 43 双运行时均加载成功，04-verify 第 13 项通过"
+    },
+    {
+      "package": "@napi-rs/canvas-*",
+      "upstream": true,
+      "community": "龙芯官方源 @napi-rs/canvas-linux-loong64-gnu@0.1.100（与 lock 0.1.100 精确对齐）",
+      "status": "OFFICIAL_NATIVE_VERIFIED",
+      "evidence": "Electron 43 下真实绘制 PNG（magic 89504e470d0a1a0a）；官方包漏声明 libstdc++，由 05 脚本 patchelf --add-needed 补齐",
+      "note": "桌面产物按上游设计裁掉 canvas（policy fail-closed 断言 + pdf 插件自研 Matrix2D），原生包服务源码树/CLI/构建期，不进 app.asar"
+    },
+    {
+      "package": "@napi-rs/keyring-*",
+      "upstream": false,
+      "community": "无（龙芯官方源亦无）",
+      "status": "RUNTIME_DEGRADED",
+      "action": "stage 跳过原生包；运行时回退文件凭据（上游 systemCredentialCipher 已实现该降级）。需 OS 密钥环时可从 Rust 源码编译"
+    },
+    {
+      "package": "@mbears/opentui-core",
+      "upstream": "pure-js",
+      "community": "0.2.15 与工程锁定版本一致（龙芯官方源同版本）",
+      "status": "NOT_A_BLOCKER",
+      "action": "纯 JS 包（无 .node），无需 loong64 适配；此前标记为 BLOCKED 有误"
+    },
+    {
+      "package": "@lydell/node-pty-*",
+      "upstream": false,
+      "community": "registry.loongnix.cn:5873 的 @lydell/node-pty-linux-loong64@1.2.0-beta.10（与工程 optionalDependencies 精确匹配）",
+      "status": "VERIFIED_OFFICIAL",
+      "action": "scripts/06 默认从龙芯官方源完整落地（lib/ + prebuilds），Electron 43 / Node 24 双环境加载通过；下载失败降级本地编译（node-gyp + Electron 43 headers + patchelf 去 libnode.so.115）"
+    }
+  ],
+  "loongnixRegistry": {
+    "url": "https://registry.loongnix.cn:5873",
+    "type": "verdaccio",
+    "available": [
+      "@lydell/node-pty-linux-loong64@1.2.0-beta.10",
+      "@napi-rs/canvas-linux-loong64-gnu@0.1.100（与 lock 精确对齐；源上 20 个版本，含 0.1.100 及 1.x 线）",
+      "@img/sharp-linux-loong64@0.34.3-0.35.5",
+      "@img/sharp-libvips-linux-loong64@1.2.0-1.3.4",
+      "@tailwindcss/oxide-linux-loong64-gnu@4.2.2（与 lock 精确对齐；源上 11 个版本 4.1.11–4.3.5）",
+      "@mbears/opentui-core@0.2.15",
+      "@rolldown/binding-linux-loong64-gnu",
+      "lightningcss-linux-loong64-gnu",
+      "esbuild-linux-loong64"
+    ],
+    "missing": [
+      "@napi-rs/keyring-linux-loong64-gnu",
+      "@oxlint 相关平台包"
+    ],
+    "note": "龙芯官方维护的 npm 镜像。判定是否有可用包必须查完整 versions 列表，不能只看 dist-tags.latest：此前据此误判 canvas/oxide 版本不匹配，实测二者都有与 lockfile 精确对齐的版本，已直接采用官方原生包、不降级。目前唯一确实缺失的是 keyring。"
+  },
+  "packaging": {
+    "script": "scripts/10-package-linux.mjs",
+    "input": "dist/linux-loong64-unpacked/ (--dir, 832993232 B)",
+    "strategy": "不让 electron-builder 出 deb/pacman：26.x 的这两个 target 走 fpm（构建期下载的 x86_64 AppImage），AppImage 运行时同理，loong64 上既下不动也跑不了。改用本机原生工具把 unpacked 目录装进标准布局，零网络依赖。",
+    "tools": {
+      "dpkgDeb": "dpkg-deb 1.22.6 (loong64), -Zzstd",
+      "bsdtar": "bsdtar 3.7.4 / libarchive 3.7.4",
+      "zstd": "zstd 1.5.7"
+    },
+    "layout": {
+      "appDir": "/opt/zcode-preview",
+      "launcher": "/usr/bin/zcode-preview -> ../../opt/zcode-preview/zcode-preview（相对软链，可重定位）",
+      "desktop": "/usr/share/applications/zcode-preview.desktop",
+      "icons": 9,
+      "chromeSandbox": "4755 root:root"
+    },
+    "deb": {
+      "file": "zcode-preview_3.18.0_loong64.deb",
+      "bytes": 222477412,
+      "sha256": "e9cfa1138dc35eee7226d40caf870200d2335b9933e9ecc894b1dbbde4b0a6ed",
+      "dependsCount": 26,
+      "dependsSource": "readelf -d DT_NEEDED(34) + dpkg -S 反查；系统库目录白名单 + 基线运行库 + -dev/Essential 过滤，排除 gcc-14.4.0 / liblol / noctalia 等同名误命中",
+      "dependsUnresolved": 0
+    },
+    "pacman": {
+      "file": "zcode-preview-3.18.0-1-loong64.pkg.tar.zst",
+      "bytes": 222239331,
+      "sha256": "fa96b4cc4cbda5efd51aabd6d773d54c3007198ced16ea8b4e125fac7530be33",
+      "metadata": [".PKGINFO", ".MTREE", ".BUILDINFO"]
+    },
+    "selfChecks": "22 PASS / 0 FAIL（control 字段 / Depends 误命中 / app.asar / 相对软链 / setuid chrome-sandbox / desktop-file-validate / zstd 校验 / pacman 元数据等）",
+    "idempotentAudit": "node scripts/10-package-linux.mjs --check：复验产物存在 + 体积 + SHA256，6 PASS / 0 FAIL",
+    "report": "report/linux-packages.json",
+    "note": "两个包均非官方上游发布；control Description 已注明 community loong64 port。"
+  },
+  "verified": {
+    "pnpmInstall": "pnpm install --ignore-scripts --no-frozen-lockfile => exit 0, 2491 resolved / 2273 downloaded / 2692 added, 3m42s",
+    "verifyScript": "18 PASS / 0 FAIL（14 项运行时/平台/原生包 + 4 项安装包：产物与 SHA256、deb 控制字段、pacman .PKGINFO、22 项构造自检）；首次复现时体检排在打包前，安装包组自动 SKIP，出包后 reproduce.sh 会二次体检补齐",
+    "firstPackageBuild": "@zcode/formal-proof vite build => exit 0, 572 modules, built in 336ms, 产出 dist/index.html + CSS + JS",
+    "largePackageBuild": "@zcode/web-share vite build => exit 0, 6308 modules, built in 28.08s, 产出 5.8 MB JS",
+    "fullBuild": "pnpm run build:bootstrap => exit 0, 5m50s, 21 个构建产物，含 packages/desktop 生产构建（1m35s），日志 report/build-final.log",
+    "bundleDryRun": "pnpm bundle:desktop -- --os linux --arch loong64 --dry-run => pnpm exec electron-builder --config electron-builder.config.js --linux --loong64",
+    "electronBuilder": "解析到 @loongdotjs/electron-builder 26.15.6（龙芯分支生效），配置对象与 scheme.json 全量静态比对后未知字段为 0",
+    "electronHeaders": "node-v43.7.7-headers.tar.gz 340 KiB，tar 校验通过，已解压到 ~/.cache/electron/（供 ABI 148 重编译）",
+    "nodePty": "已切换为龙芯官方包 @lydell/node-pty-linux-loong64@1.2.0-beta.10（DT_NEEDED 仅 libstdc++/libm/libgcc_s/libc/ld-linux，无 libnode 依赖；Electron 43 与 Node 24 双环境 require 通过）；本地源码编译路径保留为 fallback，详见 report/native-node-pty.json",
+    "bundleBeforePack": "beforePack 的 node-pty prebuild restore 通过（5ms）",
+    "electronDist": "ZCODE_ELECTRON_DIST 指向本地已校验 zip（sha256 与 SHASUMS256.txt 一致），electron-builder 走 electronDist 直解压分支，零下载；日志 report/bundle-dir-2.log",
+    "packaging": "electron-builder 26.15.6 完整跑通 linux/loong64 packaging：asar 382 MB、afterPack 全部断言通过（node-pty / CUA sharp / CUA koffi / CUA helper / mac locales）、sourcemap 清理 5498 处引用",
+    "desktopBundle": "产物 dist/linux-loong64-unpacked/ 约 805 MB（--dir 形态），含 Electron 43.7.7 运行时 + app.asar + glm agent 资源；完整链路日志 report/bundle-final.log",
+    "patchAudit": "patches/zcode-loong64.patch 覆盖 29 条补丁涉及的 14 个上游文件（364 行），git apply -R --check 与干净副本 git apply --check 双向通过；seq 21 的过时「后续可再接 loongdeb」注释已改为指向 scripts/10",
+    "electronApiAudit": "08-audit-electron-api.mjs：8281 源文件、57 个 electron 具名导入与 43.7.7 electron.d.ts 全量比对，缺失 0 项（修复前仅 ClipboardItem 缺失）",
+    "runtimeLaunch": "dist/linux-loong64-unpacked/zcode-preview 在 Deepin 25 图形会话真实启动：主进程无未捕获异常、窗口渲染完成（report/zcode-loong64-launch.png）、host 子进程拉起且 RPC 正常（project.readTree / setting.update / onboarding-record.*）",
+    "smokeLaunch": "09-smoke-launch.sh 5/5 PASS（无未捕获异常 / 主窗口创建 / 渲染进程无 did-fail-load / host 子进程拉起 / 观察期内存活），日志 report/smoke-launch.log",
+    "exitPath": "退出码 132(SIGILL) → 0，GPU process isn't usable FATAL 1 次 → 0 次（loong64 专用 --disable-gpu-process-crash-limit）",
+    "officialNativeBindings": "龙芯官方源直取 2 项：@napi-rs/canvas-linux-loong64-gnu@0.1.100 + @tailwindcss/oxide-linux-loong64-gnu@4.2.2，与 lockfile 精确对齐，零源码/零 lockfile 改动；Node 24 + Electron 43 双运行时实测（canvas 真实绘制 PNG、oxide Scanner 可用）；由 05 脚本幂等固化，报告 report/native-injections.json",
+    "nativeCanvasDesktopScope": "desktop-native-package-policy.mjs 上游有意裁剪 canvas（fail-closed 断言 + pdf 插件自研 Matrix2D 替代），桌面产物不含 canvas 原生绑定属预期设计，不是缺陷",
+    "finalBundle": "2026-11-12 重打包 exit=0（11m48s），afterPack:assertPackagedNativeResourcePolicy 等全部断言通过，产物 805 MB / app.asar 382607514 B；09 冒烟 5/5 PASS。日志 report/bundle-official-native.log",
+    "linuxPackages": "scripts/10-package-linux.mjs exit=0：deb 222477412 B / pacman 222239331 B，均由本机 dpkg-deb -Zzstd + bsdtar/zstd 从 --dir 产物构造；内置 22 PASS / 0 FAIL，Depends 26 项且无误命中 unresolved=0；SHA256 见 packaging 段，报告 report/linux-packages.json 与日志 report/package-linux.log",
+    "installedDebLaunch": "把 deb 解包到临时根后，用 ZCODE_SMOKE_APP=<tmp>/usr/bin/zcode-preview 走相对软链 /usr/bin -> ../../opt/zcode-preview 真实启动：5/5 PASS、GPU process isn't usable FATAL 0 次、退出码正常；截图 report/zcode-loong64-installed-deb.png，日志 report/smoke-installed-deb.log",
+    "reproduceStages": "reproduce.sh 11 阶段（clone/fetch/patch/install/inject/pty/verify/build/bundle/package/smoke），新增 package 与 --skip-packages；package 尾部二次跑 04-verify.sh 补齐安装包检查，--dry-run 通过"
+  },
+  "blockers": [
+    "Electron 44.7.0 无 loong64 预编译且本机资源不足以自编译 Chromium；已降级 43.7.7。43/44 API 差已审计完毕：全仓仅 ClipboardItem 一处缺失，已用运行时探测 + writeImage 回落修好",
+    "Electron ABI 148 与宿主 Node 24 ABI 137 不同，所有原生模块必须按 Electron 43 headers 重编译",
+    "@napi-rs/keyring 无 loong64 二进制（上游与龙芯官方源均无）：已走运行时降级（文件凭据），是全链路唯一保留的降级项。canvas / oxide 已确认龙芯官方源有精确对齐版本，改为直取原生包",
+    "原生搜索工具（ripgrep/ugrep）走 enabled=false 降级，龙芯包内不带预编译，需验证系统 rg 回退路径",
+    "electron-builder 龙芯分支为 26.15.6，与上游 26.17.0 存在版本差；allowMissingDependencies 已适配，--dir 完整出包已覆盖大部分行为，deb/pacman 由移植层脚本另行构造（不经 electron-builder）"
+  ]
+}

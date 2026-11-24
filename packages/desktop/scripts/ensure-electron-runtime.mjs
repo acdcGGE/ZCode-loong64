@@ -19,6 +19,17 @@ async function installedBinary(packageRoot) {
 }
 
 function installRuntime(packageRoot) {
+  // loong64: 官方与 npmmirror 均无 linux-loong64 的 Electron zip，install.js 会直连
+  // GitHub 下载 139MB 并在弱网下 terminated（postinstall exit 1）。移植层已用
+  // 00-fetch-runtime.sh 下载并校验过同版本 dist，ELECTRON_OVERRIDE_DIST_PATH 指向它；
+  // 直接硬链/复制到 electron 包期望的 dist 并写 path.txt，让 installedBinary 命中，零下载。
+  const { cpSync, writeFileSync: writeTxt } = require("node:fs");
+  const override = process.env.ELECTRON_OVERRIDE_DIST_PATH?.trim();
+  if (override && require("node:fs").existsSync(join(override, "electron"))) {
+    cpSync(override, join(packageRoot, "dist"), { recursive: true, force: true });
+    writeTxt(join(packageRoot, "path.txt"), "electron\n");
+    return Promise.resolve();
+  }
   return new Promise((resolve, reject) => {
     // 新安装入口未配置镜像时会直连 GitHub；仅给安装子进程补既有镜像，避免影响 builder 辅助包下载。
     const env = {

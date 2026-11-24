@@ -4,7 +4,7 @@ pnpm = "10.33.2"
 
 [env]
 COREPACK_ENABLE_PROJECT_SPEC = "0"
-ELECTRON_MIRROR = "https://npmmirror.com/mirrors/electron/"
+ELECTRON_MIRROR = "https://github.com/darkyzhou/electron-loong64/releases/download/"
 
 [tasks.install]
 description = "Install root workspace dependencies with the pinned pnpm."

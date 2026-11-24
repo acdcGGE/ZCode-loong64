@@ -358,6 +358,15 @@ if (!app.isPackaged && process.env.ZCODE_DISABLE_FIXED_REMOTE_DEBUGGING_PORT !==
   app.commandLine.appendSwitch("remote-debugging-port", "9229");
 }
 
+// loong64：最后一个窗口关闭后 Chromium 仍会尝试重启 GPU 进程，而该平台上的重启必然失败
+// （gpu_process_host: GPU process launch failed error_code=1002），连续失败达到上限后
+// gpu_data_manager 走 FATAL 路径直接 abort —— 在 LoongArch 上表现为 SIGILL、退出码 132，
+// 即"应用能正常用，但每次退出都被记一次崩溃"。放开崩溃上限后重启失败只记日志，退出干净。
+// 仅对 loong64 生效，其他平台行为保持不变。
+if (process.arch === "loong64") {
+  app.commandLine.appendSwitch("disable-gpu-process-crash-limit");
+}
+
 app.setName(runtimeApplicationName);
 if (runtimeHomePath) {
   app.setPath("home", runtimeHomePath);

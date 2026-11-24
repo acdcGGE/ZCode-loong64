@@ -1,0 +1,15 @@
+{
+  "checkedAt": "2026-11-24T17:18:20+08:00",
+  "pass": 18,
+  "fail": 0,
+  "node": "v24.14.0",
+  "nodeArch": "loong64",
+  "electron": "43.7.7 node=24.21.0 abi=148",
+  "targetPlatformKey": "linux-loong64",
+  "bundleTarget": "[bundle] target=linux/loong64",
+  "nodePtyPrebuild": "fork,open,resize,process",
+  "officialNativeBindings": "png=101 scanner=function",
+  "linuxPackagesChecks": "22/22",
+  "linuxPackagesDeb": "zcode-preview_4.0.0_loong64.deb",
+  "linuxPackagesPacman": "zcode-preview-4.0.0-1-loong64.pkg.tar.zst"
+}
